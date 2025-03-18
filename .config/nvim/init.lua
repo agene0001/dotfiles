@@ -447,8 +447,8 @@ local plugins = {
 require("lazy").setup(plugins, opts)
 require("catppuccin").setup()
 -- Additions setups
-vim.cmd("set number")
-lua = { "stylua" }, vim.cmd("set autoindent")
+vim.cmd("set relativenumber")
+vim.cmd("set autoindent")
 -- Enable folding by default
 vim.opt.foldenable = false
 vim.opt.tabstop = 2 -- Use 2 spaces for a tab character
@@ -510,13 +510,13 @@ _G.open_menu = function()
       Menu.item("Run Python Script"),
     },
     on_submit = function(item)
-      local exe_name = vim.fn.expand("%:r") .. ".exe"
+      local exe_name = vim.fn.expand("%:r")
       if item.text == "Make" then
         run_command("make")
       elseif item.text == "GCC Compile" then
-        run_command("gcc % -o " .. exe_name .. " && echo '' && ./" .. exe_name)
+        run_command("gcc % -o " .. exe_name .. ".out && echo '' && ./" .. exe_name .. ".out")
       elseif item.text == "Wingcc Compile" then
-        run_command("wingcc % -o " .. exe_name .. " && echo '' && ./" .. exe_name)
+        run_command("wingcc % -o " .. exe_name .. ".exe && echo '' && ./" .. exe_name .. ".exe")
       elseif item.text == "Run Node Server" then
         run_command("node server.js")
       elseif item.text == "Run Python Script" then
