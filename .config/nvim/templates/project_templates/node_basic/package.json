@@ -1,0 +1,20 @@
+{
+  "name": "{{_project_name_}}",
+  "version": "1.0.0",
+  "description": "{{_variable:project_description_}} - A Node.js project",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "{{_author_}} <{{_email_}}>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
