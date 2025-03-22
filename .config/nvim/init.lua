@@ -164,7 +164,12 @@ local plugins = {
       })
     end,
   },
-
+  {
+    "ramilito/kubectl.nvim",
+    config = function()
+      require("kubectl").setup()
+    end,
+  },
   {
     "ibhagwan/fzf-lua",
     -- optional for icon support
