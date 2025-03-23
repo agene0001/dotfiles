@@ -126,6 +126,15 @@ local plugins = {
     end,
   },
   {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
+  {
     "agene0001/template.nvim",
     branch = "main",
     cmd = { "Template", "TemProject" }, -- Load on command execution
@@ -462,36 +471,189 @@ vim.opt.expandtab = true -- Convert tabs to spaces
 -- Additional setup for other plugins can go here
 -- Override nvim-tree with treemux for directory openings
 -- Create global functions to handle tree operations via treemux
+-- Define the global functions properly
 _G.open_menu = function()
   local Menu = require("nui.menu")
   local Input = require("nui.input")
 
-  local function run_command(command)
-    local input_box = Input({
+  local function run_command(cmd)
+    vim.cmd("!" .. cmd) -- Executes shell command
+  end
+
+  local function run_node_script()
+    -- Find all JavaScript files in the current directory
+    local js_files_raw = vim.fn.systemlist("find . -maxdepth 1 -type f -name '*.js' | sort")
+
+    -- If no JS files are found
+    if #js_files_raw == 0 then
+      print("No JavaScript files found in the current directory.")
+      return
+    end
+
+    -- Format file paths for menu (remove './' prefix if present)
+    local js_files = {}
+    for _, file in ipairs(js_files_raw) do
+      local display_name = file:gsub("^%./", "")
+      table.insert(js_files, Menu.item(display_name))
+    end
+
+    -- Create menu for JS file selection
+    local js_menu = Menu({
       position = "50%",
-      size = { width = 40 },
+      size = {
+        width = 40,
+        height = math.min(#js_files + 2, 10),
+      },
       border = {
         style = "rounded",
-        text = { top = " Enter Arguments (or leave empty) ", top_align = "center" },
+        text = { top = " Select JavaScript File ", top_align = "center" },
       },
       win_options = {
         winblend = 10,
         winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
       },
     }, {
-      prompt = "> ",
-      on_submit = function(args)
-        local final_command = command
-        if args and args ~= "" then
-          final_command = final_command .. " " .. args
-        end
-        vim.cmd("!" .. final_command)
+      lines = js_files,
+      on_submit = function(item)
+        run_command("node " .. item.text)
       end,
     })
-
-    input_box:mount()
+    js_menu:mount()
   end
+  local function run_c_compilation()
+    local exe_name = vim.fn.expand("%:r")
+    local compiler_menu = Menu({
+      position = "50%",
+      size = {
+        width = 30,
+        height = 5,
+      },
+      border = {
+        style = "rounded",
+        text = { top = " Select Compiler ", top_align = "center" },
+      },
+      win_options = {
+        winblend = 10,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+    }, {
+      lines = {
+        Menu.item("GCC"),
+        Menu.item("Wingcc"),
+      },
+      on_submit = function(compiler)
+        if compiler.text == "GCC" then
+          run_command("gcc % -o " .. exe_name .. ".out && echo '' && ./" .. exe_name .. ".out")
+        elseif compiler.text == "Wingcc" then
+          run_command("wingcc % -o " .. exe_name .. ".exe && echo '' && ./" .. exe_name .. ".exe")
+        end
+      end,
+    })
+    compiler_menu:mount()
+  end
+  local function run_npm()
+    -- Check if package.json exists
+    local has_package_json = vim.fn.filereadable("package.json") == 1
 
+    -- Create NPM options menu
+    local npm_menu = Menu({
+      position = "50%",
+      size = {
+        width = 40,
+        height = 3,
+      },
+      border = {
+        style = "rounded",
+        text = { top = " NPM Options ", top_align = "center" },
+      },
+      win_options = {
+        winblend = 10,
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+    }, {
+      lines = {
+        Menu.item("Install Package"),
+        Menu.item("Run Script"),
+      },
+      on_submit = function(item)
+        if item.text == "Install Package" then
+          -- Create input dialog for package name
+          local input = Input({
+            position = "50%",
+            size = {
+              width = 40,
+            },
+            border = {
+              style = "rounded",
+              text = { top = " Package Name (leave empty for npm install) ", top_align = "center" },
+            },
+            win_options = {
+              winblend = 10,
+              winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+            },
+          }, {
+            prompt = "> ",
+            default_value = "",
+            on_submit = function(value)
+              if value == "" then
+                run_command("npm install")
+              else
+                run_command("npm install " .. value)
+              end
+            end,
+          })
+          input:mount()
+        elseif item.text == "Run Script" and has_package_json then
+          -- Parse package.json to extract scripts
+          local package_content = vim.fn.system("cat package.json")
+
+          -- Try to parse JSON and extract scripts
+          local success, package_data = pcall(vim.fn.json_decode, package_content)
+          if not success or not package_data.scripts or vim.tbl_isempty(package_data.scripts) then
+            print("No scripts found in package.json or unable to parse it.")
+            return
+          end
+
+          -- Create menu items from scripts
+          local script_items = {}
+          for script_name, _ in pairs(package_data.scripts) do
+            table.insert(script_items, Menu.item(script_name))
+          end
+
+          -- Sort script items alphabetically
+          table.sort(script_items, function(a, b)
+            return a.text < b.text
+          end)
+
+          -- Create script selection menu
+          local script_menu = Menu({
+            position = "50%",
+            size = {
+              width = 40,
+              height = math.min(#script_items + 2, 10),
+            },
+            border = {
+              style = "rounded",
+              text = { top = " Select NPM Script ", top_align = "center" },
+            },
+            win_options = {
+              winblend = 10,
+              winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+            },
+          }, {
+            lines = script_items,
+            on_submit = function(script_item)
+              run_command("npm run " .. script_item.text)
+            end,
+          })
+          script_menu:mount()
+        elseif item.text == "Run Script" and not has_package_json then
+          print("No package.json found in the current directory.")
+        end
+      end,
+    })
+    npm_menu:mount()
+  end
   local menu = Menu({
     position = "50%",
     size = {
@@ -509,31 +671,30 @@ _G.open_menu = function()
   }, {
     lines = {
       Menu.item("Make"),
-      Menu.item("GCC Compile"),
-      Menu.item("Wingcc Compile"),
-      Menu.item("Run Node Server"),
+      Menu.item("C Compilation"),
+      Menu.item("Run Node Script"),
       Menu.item("Run Python Script"),
+      Menu.item("NPM Options"),
     },
     on_submit = function(item)
-      local exe_name = vim.fn.expand("%:r")
       if item.text == "Make" then
         run_command("make")
-      elseif item.text == "GCC Compile" then
-        run_command("gcc % -o " .. exe_name .. ".out && echo '' && ./" .. exe_name .. ".out")
-      elseif item.text == "Wingcc Compile" then
-        run_command("wingcc % -o " .. exe_name .. ".exe && echo '' && ./" .. exe_name .. ".exe")
-      elseif item.text == "Run Node Server" then
-        run_command("node server.js")
+      elseif item.text == "C Compilation" then
+        run_c_compilation() -- Calls the submenu for compiler selection
+      elseif item.text == "Run Node Script" then
+        run_node_script()
       elseif item.text == "Run Python Script" then
         run_command("python3 %")
+      elseif item.text == "NPM Options" then
+        run_npm() -- Call the new NPM functionality
       end
     end,
   })
-
   menu:mount()
 end
 
-vim.api.nvim_set_keymap("n", "<leader>m", ":lua open_menu()<CR>", { noremap = true, silent = true })
+-- Set up keymap for the menu
+vim.api.nvim_set_keymap("n", "<leader>m", ":lua _G.open_menu()<CR>", { noremap = true, silent = true })
 
 function _G.open_treemux()
   vim.fn.system("tmux display-popup -E 'treemux'")
