@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search auto-notify you-should-use)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search you-should-use)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -210,3 +210,4 @@ export PATH=$PATH:/snap/bin
 export BASHSHELL=$(which bash)
 export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
+

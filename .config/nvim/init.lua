@@ -522,6 +522,37 @@ _G.open_menu = function()
   end
   local function run_c_compilation()
     local exe_name = vim.fn.expand("%:r")
+
+    -- Function to prompt for command-line arguments
+    local function prompt_arguments(compiler_cmd)
+      local input = Input({
+        position = "50%",
+        size = { width = 40 },
+        border = {
+          style = "rounded",
+          text = { top = " Enter Arguments ", top_align = "center" },
+        },
+        win_options = {
+          winblend = 10,
+          winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        },
+      }, {
+        prompt = "Args: ",
+        on_submit = function(args)
+          run_command(
+            compiler_cmd
+              .. " && echo '' && ./"
+              .. exe_name
+              .. (compiler_cmd:match("wingcc") and ".exe" or ".out")
+              .. " "
+              .. args
+          )
+        end,
+      })
+      input:mount()
+    end
+
+    -- Compiler selection menu
     local compiler_menu = Menu({
       position = "50%",
       size = {
@@ -542,15 +573,18 @@ _G.open_menu = function()
         Menu.item("Wingcc"),
       },
       on_submit = function(compiler)
+        local compiler_cmd
         if compiler.text == "GCC" then
-          run_command("gcc % -o " .. exe_name .. ".out && echo '' && ./" .. exe_name .. ".out")
+          compiler_cmd = "gcc % -o " .. exe_name .. ".out"
         elseif compiler.text == "Wingcc" then
-          run_command("wingcc % -o " .. exe_name .. ".exe && echo '' && ./" .. exe_name .. ".exe")
+          compiler_cmd = "wingcc % -o " .. exe_name .. ".exe"
         end
+        prompt_arguments(compiler_cmd) -- Ask for command arguments after compilation
       end,
     })
     compiler_menu:mount()
   end
+
   local function run_npm()
     -- Check if package.json exists
     local has_package_json = vim.fn.filereadable("package.json") == 1
