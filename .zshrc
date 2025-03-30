@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search you-should-use)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search you-should-use virtualenv)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -201,6 +201,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # Set up fzf key bindings and fuzzy completion
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status virtualenv)
 source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
 bindkey '^[[A' history-substring-search-up
