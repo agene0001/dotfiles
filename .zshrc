@@ -184,6 +184,7 @@ alias fo='xdg-open $(fzf '"$preview"')'  # Linux
 alias foe='xdg-open $(fzf --exact '"$preview"')'  # Linux
 alias fenv='env | fzf'
 alias fenve='env | fzf --exact'
+alias nano='nvim'
 # Load additional alias definitions if available
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 
@@ -212,3 +213,4 @@ export BASHSHELL=$(which bash)
 export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
 
+export PATH=$PATH:/home/kali/.local/share/gem/ruby/3.3.0/bin
