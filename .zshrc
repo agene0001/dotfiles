@@ -214,3 +214,11 @@ export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
 
 export PATH=$PATH:/home/kali/.local/share/gem/ruby/3.3.0/bin
+
+
+export PATH="$HOME/Downloads/tor-browser:$PATH"
+# Start tmux automatically if not already in a session
+if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+  tmux attach -t default || tmux new -s default
+fi
+

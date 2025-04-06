@@ -4,6 +4,7 @@ sudo apt full-upgrade
 sudo apt autoremove
 sudo apt install neovim
 sudo apt install tmux
+sudo apt install i3
 sudo apt-get install ruby-full
 gem install colorls
 sudo apt install nodejs npm
