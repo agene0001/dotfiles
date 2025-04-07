@@ -72,7 +72,7 @@ local plugins = {
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
-      "L3MON4D3/LuaSnip", -- Snippet engine (choose one)
+      "L3MON4D3/LuaSnip",         -- Snippet engine (choose one)
       "saadparwaiz1/cmp_luasnip", -- Snippet source for cmp
     },
     config = function()
@@ -197,7 +197,6 @@ local plugins = {
       require("mason").setup() -- Initialize Mason
     end,
   },
-  { "github/copilot.vim" },
   {
     "williamboman/mason-lspconfig.nvim",
     after = "mason.nvim", -- Ensure mason.nvim loads first
@@ -465,8 +464,8 @@ vim.cmd("set relativenumber")
 vim.cmd("set autoindent")
 -- Enable folding by default
 vim.opt.foldenable = false
-vim.opt.tabstop = 2 -- Use 2 spaces for a tab character
-vim.opt.shiftwidth = 2 -- Indentation level of 2 spaces
+vim.opt.tabstop = 2      -- Use 2 spaces for a tab character
+vim.opt.shiftwidth = 2   -- Indentation level of 2 spaces
 vim.opt.expandtab = true -- Convert tabs to spaces
 -- Additional setup for other plugins can go here
 -- Override nvim-tree with treemux for directory openings
@@ -541,11 +540,11 @@ _G.open_menu = function()
         on_submit = function(args)
           run_command(
             compiler_cmd
-              .. " && echo '' && ./"
-              .. exe_name
-              .. (compiler_cmd:match("wingcc") and ".exe" or ".out")
-              .. " "
-              .. args
+            .. " && echo '' && ./"
+            .. exe_name
+            .. (compiler_cmd:match("wingcc") and ".exe" or ".out")
+            .. " "
+            .. args
           )
         end,
       })

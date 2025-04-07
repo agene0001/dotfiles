@@ -1,16 +1,16 @@
 #!/bin/bash
 sudo apt update
 sudo apt full-upgrade
+sudo apt install zsh
+chsh -s "$(which zsh)"
 sudo apt autoremove
-sudo apt install neovim
-sudo apt install tmux
-sudo apt install i3
-sudo apt-get install ruby-full
-gem install colorls
-sudo apt install nodejs npm
-sudo apt install luarocks
+sudo apt-get install python3 python3-pip git golang fd-find fzf
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo apt install tmux i3 ruby-full nodejs npm luarocks
+sudo gem install colorls
 sudo luarocks install luacheck
-sudo apt-get install git python3 golang
 go install golang.org/x/tools/gopls@latest
 wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip && \
 cd ~/.local/share/fonts && \
@@ -22,8 +22,6 @@ curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/downl
 tar xf lazygit.tar.gz lazygit
 sudo install lazygit -D -t /usr/local/bin/
 rm lazygit && rm lazygit.tar.gz
-sudo apt install fd-find
-sudo apt install fzf
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
