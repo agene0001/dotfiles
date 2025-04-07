@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search you-should-use virtualenv)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search virtualenv)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -184,6 +184,7 @@ alias fo='xdg-open $(fzf '"$preview"')'  # Linux
 alias foe='xdg-open $(fzf --exact '"$preview"')'  # Linux
 alias fenv='env | fzf'
 alias fenve='env | fzf --exact'
+alias nano='nvim'
 # Load additional alias definitions if available
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 
@@ -212,3 +213,14 @@ export BASHSHELL=$(which bash)
 export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
 eval "$(ssh-agent -s)"
+
+export PATH=$PATH:/home/kali/.local/share/gem/ruby/3.3.0/bin
+
+
+export PATH="$HOME/Downloads/tor-browser:$PATH"
+# Start tmux automatically if not already in a session
+if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+  tmux attach -t default || tmux new -s default
+fi
+
+export PATH="$HOME/bin:$PATH"
