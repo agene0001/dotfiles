@@ -14,5 +14,3 @@ cd ~
 mkdir -p ~/api/wordlists
 curl https://wordlists-cdn.assetnote.io/data/automated/httparchive_apiroutes_2021_06_28.txt > ~/api/wordlists/latest_api_wordlist.txt
 pipx install arjun
-sudo apt install seclists
-sudo apt install gdb

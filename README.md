@@ -1,46 +1,79 @@
-# install process
+Here's a cleaned-up version of your README with clearer structure, removed inline install instructions, and a streamlined workflow using your provided scripts:
 
-clone repository to ~/dotfiles/
-[Neovim Install Guide](https://github.com/neovim/neovim/blob/master/INSTALL.md)
-download oh-my-zsh\
+---
 
-### Nvim LSPs
+# 🛠️ Dotfiles Setup
 
-download npm and luarocks then hit :MasonInstall in nvim
+A personal, highly customized setup for terminal tools, Neovim, Zsh, Tmux, Ghostty, and hacking utilities.
 
-## change to zsh
+## ⚡ Installation Workflow
 
-sudo chsh -s $(which zsh)
+Clone this repository:
 
-## plugins install:
+```bash
+git clone https://github.com/your-username/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+```
 
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
-git clone https://github.com/MichaelAquilina/zsh-auto-notify.git $ZSH_CUSTOM/plugins/auto-notify
-git clone https://github.com/MichaelAquilina/zsh-you-should-use ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use
+Then follow these steps to initialize everything:
 
-## download colorls
+---
 
-sudo gem install colorls
-https://github.com/athityakumar/colorls
+### 🧰 1. System & Tool Initialization
 
-## tmux
+Run:
 
-### tpm install
+```bash
+./run-command.sh
+```
 
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+This script installs system dependencies (like Python, Node, LuaRocks), sets up Neovim and Oh-My-Zsh, and prepares your development environment.
 
-### nerdfont install for catpuccin
+---
 
-wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip \
-&& cd ~/.local/share/fonts \
-&& unzip JetBrainsMono.zip \
-&& rm JetBrainsMono.zip \
-&& fc-cache -fv
+### 👻 2. Install Ghostty (Terminal Emulator)
 
-## Download Ghostty
+Run:
 
-good luck!! no help here figure it out
-just kidding go to this page https://ghostty.org/docs/install/build and download zig and then clone ghostty and use zig to build it. or use ubuntu package manager but not that good in my opinion. building makes sure you get the latest version but no updates
-stow . to apply configuiration in dotfiles
+```bash
+./ghostty.sh
+```
+
+This script downloads and builds [Ghostty](https://ghostty.org) from source using Zig, ensuring you get the latest version.
+
+---
+
+### 🕵️ 3. Hack Tools Setup
+
+Run:
+
+```bash
+./hacktools.sh
+```
+
+This installs custom web API testing tools, reverse engineering utilities, and other offensive security essentials.
+
+---
+
+## 💡 Extras
+
+- All configurations are managed via `stow`. After setup, simply run:
+
+  ```bash
+  stow .
+  ```
+
+- Fonts (like NerdFonts) and plugins for `tmux`, `zsh`, and `nvim` are handled automatically.
+- Customize further inside the `~/dotfiles` directory.
+
+---
+
+## 🔗 References
+
+- [Neovim Install Guide](https://github.com/neovim/neovim/blob/master/INSTALL.md)
+- [Ghostty Build Docs](https://ghostty.org/docs/install/build)
+- [Oh-My-Zsh](https://ohmyz.sh/)
+
+---
+
+Let me know if you want this turned into a `README.md` file directly or need any of the scripts tweaked to auto-detect things like OS/package manager.
