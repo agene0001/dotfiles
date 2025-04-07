@@ -211,4 +211,4 @@ export PATH=$PATH:/snap/bin
 export BASHSHELL=$(which bash)
 export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
-
+eval "$(ssh-agent -s)"
