@@ -212,6 +212,7 @@ export PATH=$PATH:/snap/bin
 export BASHSHELL=$(which bash)
 export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
+eval "$(ssh-agent -s)"
 
 export PATH=$PATH:/home/kali/.local/share/gem/ruby/3.3.0/bin
 
