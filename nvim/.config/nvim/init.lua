@@ -1,7 +1,5 @@
 -- Ensure lazy.nvim is installed
--- stylua: ignore
 ---@diagnostic disable: undefined-global
--- or for luacheck:
 -- luacheck: globals vim
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -16,7 +14,6 @@ vim.diagnostic.config({
 })
 -- Global variable to track whether diagnostics are enabled
 local diagnostics_enabled = false
-
 -- Function to toggle diagnostics configuration
 local function ToggleDiagnostics()
   if diagnostics_enabled then
@@ -72,7 +69,7 @@ local plugins = {
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
-      "L3MON4D3/LuaSnip", -- Snippet engine (choose one)
+      "L3MON4D3/LuaSnip",         -- Snippet engine (choose one)
       "saadparwaiz1/cmp_luasnip", -- Snippet source for cmp
     },
     config = function()
@@ -125,6 +122,7 @@ local plugins = {
       end
     end,
   },
+  { "github/copilot.vim" },
   {
     "agene0001/template.nvim",
     branch = "main",
@@ -183,7 +181,7 @@ local plugins = {
       require("mason").setup() -- Initialize Mason
     end,
   },
-  { "github/copilot.vim" },
+
   {
     "williamboman/mason-lspconfig.nvim",
     after = "mason.nvim", -- Ensure mason.nvim loads first
@@ -447,12 +445,12 @@ local plugins = {
 require("lazy").setup(plugins, opts)
 require("catppuccin").setup()
 -- Additions setups
-vim.cmd("set relativenumber")
+vim.cmd("set number")
 vim.cmd("set autoindent")
 -- Enable folding by default
 vim.opt.foldenable = false
-vim.opt.tabstop = 2 -- Use 2 spaces for a tab character
-vim.opt.shiftwidth = 2 -- Indentation level of 2 spaces
+vim.opt.tabstop = 2      -- Use 2 spaces for a tab character
+vim.opt.shiftwidth = 2   -- Indentation level of 2 spaces
 vim.opt.expandtab = true -- Convert tabs to spaces
 -- Additional setup for other plugins can go here
 -- Override nvim-tree with treemux for directory openings
@@ -510,7 +508,7 @@ _G.open_menu = function()
       Menu.item("Run Python Script"),
     },
     on_submit = function(item)
-      local exe_name = vim.fn.expand("%:r")
+      local exe_name = vim.fn.expand("%:r");
       if item.text == "Make" then
         run_command("make")
       elseif item.text == "GCC Compile" then
@@ -566,3 +564,4 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     end
   end,
 })
+vim.g.python3_host_prog = '/Users/seymour-butts/.pyenv/shims/python3'

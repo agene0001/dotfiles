@@ -5,6 +5,64 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Homebrew setup
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Added by Toolbox App
+export PATH="$PATH:/Users/seymour-butts/Library/Application Support/JetBrains/Toolbox/scripts"
+
+# .NET tools
+export PATH="$PATH:/Users/seymour-butts/.dotnet/tools"
+
+# Python 3.12
+export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:${PATH}"
+
+# Set Spark home directory and add it to PATH
+export SPARK_HOME=/Users/seymour-butts/Downloads/spark
+export PATH="$SPARK_HOME/bin:$PATH"
+
+# Add Google Cloud SDK to PATH
+export PATH="$PATH:/Users/seymour-butts/google-cloud-sdk/bin"  # Adjust path as necessary
+
+# Update PATH for the Google Cloud SDK
+if [ -f '/Users/seymour-butts/google-cloud-sdk/path.zsh.inc' ]; then
+    . '/Users/seymour-butts/google-cloud-sdk/path.zsh.inc'
+fi
+
+# Enable shell command completion for gcloud
+if [ -f '/Users/seymour-butts/google-cloud-sdk/completion.zsh.inc' ]; then
+    . '/Users/seymour-butts/google-cloud-sdk/completion.zsh.inc'
+fi
+
+# Add MySQL to PATH
+export PATH="/opt/homebrew/opt/mysql/bin:$PATH"
+export PATH="/opt/homebrew/opt/mysql@8.0/bin:$PATH"
+export PATH="/usr/local/mysql-9.0.39-mac14-arm64/bin:$PATH"
+
+# Add Ruby to PATH
+export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/lib/ruby/gems/3.4.0/bin:$PATH"
+
+# Add Flutter to PATH
+export PATH=$HOME/development/flutter/bin:$PATH
+
+# Add PostgreSQL to PATH
+export PATH="/Library/PostgreSQL/18/bin:$PATH"
+
+# Add Go to PATH
+export PATH=$HOME/go/bin:$PATH
+
+# Add snap to PATH
+export PATH=$PATH:/snap/bin
+
+# Pyenv setup
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
@@ -82,6 +140,10 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
+# Securely load secrets from a separate file.
+# Create a file like ~/.secrets and add `export OPENAI_API_KEY='your-key'`
+# if [ -f ~/.secrets ]; then . ~/.secrets; fi
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -118,27 +180,6 @@ SAVEHIST=2000
 setopt HIST_IGNORE_DUPS      # Don't save duplicate commands
 setopt APPEND_HISTORY        # Append to history file rather than overwrite
 
-# Set up chroot prompt addition if needed
-# if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-#     debian_chroot=$(cat /etc/debian_chroot)
-# fi
-# 
-# # Set up prompt (converting bash PS1 to zsh format)
-# autoload -U colors && colors
-# 
-# # Set the prompt with proper color formatting
-# if [[ "$TERM" == *256color* || "$TERM" == xterm-color ]]; then
-#   PS1='%F{green}%n@%m%f:%F{blue}%~%f$ '
-# else
-#     PS1='${debian_chroot:+($debian_chroot)}%n@%m:%~$ '
-# fi
-# 
-# # Terminal title (for xterm)
-# case "$TERM" in
-#     xterm*|rxvt*)
-#         precmd() { print -Pn "\e]0;${debian_chroot:+($debian_chroot)}%n@%m: %~\a" }
-#         ;;
-# esac
 
 # Enable color support for ls and other commands
 if [ -x /usr/bin/dircolors ]; then
@@ -149,15 +190,17 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 alias fd=fdfind
-alias ll="colorls -l --sd"
+alias bfg='java -jar /usr/local/bin/bfg.jar'
+
 # Common aliases
-# Colorls 
-alias la='colorls -a --sd'
-alias ld='colorls -d'
-alias lf='colorls -f'
-alias ls='colorls'
-alias lo ="ls"
-alias lt='colorls --tree'
+# Eza (colorls replacement)
+alias ll='eza -l --icons --group-directories-first'
+alias la='eza -a --icons --group-directories-first'
+alias ld='eza -D --icons'
+alias lf='eza -f --icons'
+alias ls='eza --icons'
+alias lo='ls'
+alias lt='eza --tree --icons'
 alias tree='tree -I .git|node_modules'
 # Alias to use find with fzf to search for files in the current directory
 # Fuzzy find and open a directory in a new terminal tab
@@ -194,11 +237,8 @@ compinit
 # Add zsh completions directory to fpath
 fpath=(~/.zsh/zsh-completions $fpath)
 
-# Load fzf if available
-
 # Add local bin to PATH
 export PATH="$HOME/.local/bin:$PATH"
-# Set up fzf key bindings and fuzzy completion
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -206,7 +246,14 @@ source ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-subs
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-export PATH=$PATH:/snap/bin
 export BASHSHELL=$(which bash)
-export PATH=$HOME/go/bin:$PATH
 # sudo mount -t drvfs G: /mnt/g
+export LIBRARY_PATH="/opt/homebrew/lib:$LIBRARY_PATH"
+export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+
+# bun completions
+[ -s "/Users/seymour-butts/.bun/_bun" ] && source "/Users/seymour-butts/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
