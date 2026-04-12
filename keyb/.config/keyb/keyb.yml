@@ -1,0 +1,193 @@
+- name: Terminal (zsh)
+  keybinds:
+    - name: Beginning of line
+      key: Ctrl+A
+    - name: End of line
+      key: Ctrl+E
+    - name: Clear screen
+      key: Ctrl+L
+    - name: Delete word backward
+      key: Ctrl+W
+    - name: Delete to end of line
+      key: Ctrl+K
+    - name: Delete to beginning of line
+      key: Ctrl+U
+    - name: Reverse search history (tv)
+      key: Ctrl+R
+    - name: Smart autocomplete (tv)
+      key: Ctrl+T
+    - name: Suspend process
+      key: Ctrl+Z
+    - name: Kill process
+      key: Ctrl+C
+    - name: End of input
+      key: Ctrl+D
+    - name: Move forward one word
+      key: Option+→
+    - name: Move backward one word
+      key: Option+←
+
+- name: Zed (General)
+  keybinds:
+    - name: Command palette
+      key: Cmd+Shift+P
+    - name: Open settings
+      key: Cmd+,
+    - name: Open keybindings
+      key: Cmd+K, Cmd+S
+    - name: File finder
+      key: Cmd+P
+    - name: Project search
+      key: Cmd+Shift+F
+    - name: Toggle terminal
+      key: Ctrl+`
+    - name: New terminal
+      key: Ctrl+~
+    - name: Go to line
+      key: Ctrl+G
+    - name: Go to definition
+      key: F12
+    - name: Peek definition
+      key: Option+F12
+    - name: Find all references
+      key: Shift+F12
+    - name: Rename symbol
+      key: F2
+    - name: Toggle comment
+      key: Cmd+/
+    - name: Quick fix / code actions
+      key: Cmd+.
+    - name: Format document
+      key: Cmd+Shift+I
+    - name: Close tab
+      key: Cmd+W
+    - name: Reopen closed tab
+      key: Cmd+Shift+T
+    - name: Split pane right
+      key: Cmd+K, Cmd+\
+    - name: Toggle left dock
+      key: Cmd+B
+    - name: Toggle right dock
+      key: Cmd+R
+    - name: Extensions
+      key: Cmd+Shift+X
+    - name: Agent panel
+      key: Cmd+Shift+A
+    - name: Inline assist
+      key: Cmd+Enter
+    - name: Task picker
+      key: Cmd+Shift+R
+    - name: Rerun last task
+      key: Option+T
+    - name: Debug panel
+      key: Cmd+Shift+D
+
+- name: Zed (Editing)
+  keybinds:
+    - name: Multi-cursor (add selection)
+      key: Cmd+D
+    - name: Select all occurrences
+      key: Cmd+Shift+L
+    - name: Move line up
+      key: Option+↑
+    - name: Move line down
+      key: Option+↓
+    - name: Duplicate line
+      key: Cmd+Shift+D
+    - name: Delete line
+      key: Ctrl+Shift+K
+    - name: Indent
+      key: Cmd+]
+    - name: Outdent
+      key: Cmd+[
+    - name: Undo
+      key: Cmd+Z
+    - name: Redo
+      key: Cmd+Shift+Z
+
+- name: lazygit
+  keybinds:
+    - name: Stage/unstage file
+      key: Space
+    - name: Stage all
+      key: a
+    - name: Commit
+      key: c
+    - name: Commit with editor
+      key: C
+    - name: Push
+      key: P
+    - name: Pull
+      key: p
+    - name: New branch
+      key: n
+    - name: Checkout branch
+      key: Space
+    - name: Stash
+      key: s
+    - name: Pop stash
+      key: g
+    - name: Rebase
+      key: r
+    - name: Amend last commit
+      key: A
+    - name: Cherry pick
+      key: C (on commits panel)
+    - name: Switch panels
+      key: Tab
+    - name: Scroll preview
+      key: Ctrl+D / Ctrl+U
+    - name: Quit
+      key: q
+
+- name: Television (tv)
+  keybinds:
+    - name: Search files
+      key: tv files
+    - name: Search file contents
+      key: tv text
+    - name: Search git repos
+      key: tv git-repos
+    - name: Search env variables
+      key: tv env
+    - name: Search aliases
+      key: tv alias
+    - name: Switch channel (remote control)
+      key: Ctrl+T (inside tv)
+    - name: Multi-select
+      key: Tab
+    - name: Confirm selection
+      key: Enter
+    - name: Cancel
+      key: Esc
+
+- name: Modern CLI Tools
+  keybinds:
+    - name: Search file contents
+      key: rg <pattern>
+    - name: Find files
+      key: fd <pattern>
+    - name: View file with syntax highlighting
+      key: bat <file>
+    - name: List directory
+      key: eza
+    - name: Smart cd (jump to frequent dir)
+      key: z <partial-name>
+    - name: Interactive git
+      key: lazygit
+    - name: System monitor
+      key: btop
+    - name: Disk usage
+      key: dust
+    - name: Quick man pages
+      key: tldr <command>
+    - name: Count lines of code
+      key: tokei
+    - name: Disk info
+      key: duf
+    - name: JSON processing
+      key: jq
+    - name: Benchmark command
+      key: hyperfine <command>
+    - name: Find and replace
+      key: sd <find> <replace>
