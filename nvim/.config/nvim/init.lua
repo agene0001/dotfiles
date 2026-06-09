@@ -404,7 +404,7 @@ local plugins = {
       vim.cmd.colorscheme("catppuccin-mocha")
     end,
   },
-<<<<<<< HEAD
+
 {
   "nvim-treesitter/nvim-treesitter",
   branch = "main", -- new rewrite; the old `nvim-treesitter.configs` API no longer exists
@@ -631,15 +631,14 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     end
   end,
 })
-<<<<<<< HEAD
+
 -- Python provider: pyenv on macOS, project venv on Linux, PATH lookup on Windows.
 if is_mac then
   vim.g.python3_host_prog = vim.fn.expand("~/.pyenv/shims/python3")
 elseif is_linux then
   vim.g.python3_host_prog = vim.fn.expand("~/.config/nvim/venv/bin/python3")
 end
-=======
-vim.g.python3_host_prog = '/Users/seymour-butts/.pyenv/shims/python3'
->>>>>>> mac-dfile
+
+
 vim.keymap.set("n", "<leader>y", 'ggVG"+y')
 vim.keymap.set("n", "<leader>a", "ggVG", { noremap = true, desc = "Select entire file" })
