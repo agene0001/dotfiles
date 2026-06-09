@@ -1,1 +1,6 @@
 .DS_Store
+*.swp
+# Secrets are machine-local, sourced by .zshrc but never committed
+.secrets
+# Stray file from an old accidental redirect
+nvim/.config/nvim/]
