@@ -5,6 +5,12 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+-- OS detection helpers (used for path/command/tmux guards throughout)
+local is_mac = vim.fn.has("mac") == 1
+local is_win = vim.fn.has("win32") == 1
+local is_linux = (vim.fn.has("unix") == 1) and not is_mac
+
 vim.diagnostic.config({
   virtual_text = true,
   signs = true,
@@ -60,6 +66,13 @@ local plugins = {
     "MunifTanjim/nui.nvim",
     lazy = false, -- Ensure it loads immediately
   },
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("nvim-tree").setup({})
+    end,
+  },
 
   {
     "hrsh7th/nvim-cmp",
@@ -97,6 +110,19 @@ local plugins = {
     end,
   },
   { "github/copilot.vim" },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
+  {
+    "ramilito/kubectl.nvim",
+    config = function()
+      require("kubectl").setup()
+    end,
+  },
   {
     "agene0001/template.nvim",
     branch = "main",
@@ -402,13 +428,12 @@ local plugins = {
     })
   end,
 },
-  { "nvim-treesitter/nvim-treesitter-locals" },
 }
 -- Plugin configuration
 require("lazy").setup(plugins, opts)
 require("catppuccin").setup()
 -- Additions setups
-vim.cmd("set number")
+vim.cmd("set relativenumber")
 vim.cmd("set autoindent")
 -- Enable folding by default
 vim.opt.foldenable = false
@@ -420,112 +445,195 @@ vim.opt.expandtab = true -- Convert tabs to spaces
 _G.open_menu = function()
   local Menu = require("nui.menu")
   local Input = require("nui.input")
+  local python = is_win and "python" or "python3"
+  local border_opts = { winblend = 10, winhighlight = "Normal:Normal,FloatBorder:FloatBorder" }
 
-  local function run_command(command)
-    local input_box = Input({
-      position = "50%",
-      size = { width = 40 },
-      border = {
-        style = "rounded",
-        text = { top = " Enter Arguments (or leave empty) ", top_align = "center" },
-      },
-      win_options = {
-        winblend = 10,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-      },
-    }, {
-      prompt = "> ",
-      on_submit = function(args)
-        local final_command = command
-        if args and args ~= "" then
-          final_command = final_command .. " " .. args
-        end
-        vim.cmd("!" .. final_command)
-      end,
-    })
-
-    input_box:mount()
+  local function run_command(cmd)
+    vim.cmd("!" .. cmd)
   end
 
-  local menu = Menu({
+  -- Pick a JavaScript file (via vim glob, no shell `find`) and run it with node.
+  local function run_node_script()
+    local js_files = vim.fn.glob("*.js", false, true)
+    if #js_files == 0 then
+      print("No JavaScript files found in the current directory.")
+      return
+    end
+    local items = {}
+    for _, file in ipairs(js_files) do
+      table.insert(items, Menu.item(file))
+    end
+    Menu({
+      position = "50%",
+      size = { width = 40, height = math.min(#items + 2, 10) },
+      border = { style = "rounded", text = { top = " Select JavaScript File ", top_align = "center" } },
+      win_options = border_opts,
+    }, {
+      lines = items,
+      on_submit = function(item)
+        run_command("node " .. item.text)
+      end,
+    }):mount()
+  end
+
+  -- Compile current C file with GCC (.out) or Wingcc (.exe), then run it.
+  local function run_c_compilation()
+    local exe_name = vim.fn.expand("%:r")
+    local function prompt_arguments(compiler_cmd, ext)
+      Input({
+        position = "50%",
+        size = { width = 40 },
+        border = { style = "rounded", text = { top = " Enter Arguments ", top_align = "center" } },
+        win_options = border_opts,
+      }, {
+        prompt = "Args: ",
+        on_submit = function(args)
+          local runner = (is_win and "" or "./") .. exe_name .. ext
+          run_command(compiler_cmd .. " && echo '' && " .. runner .. " " .. (args or ""))
+        end,
+      }):mount()
+    end
+    Menu({
+      position = "50%",
+      size = { width = 30, height = 5 },
+      border = { style = "rounded", text = { top = " Select Compiler ", top_align = "center" } },
+      win_options = border_opts,
+    }, {
+      lines = { Menu.item("GCC"), Menu.item("Wingcc") },
+      on_submit = function(compiler)
+        if compiler.text == "GCC" then
+          prompt_arguments("gcc % -o " .. exe_name .. ".out", ".out")
+        elseif compiler.text == "Wingcc" then
+          prompt_arguments("wingcc % -o " .. exe_name .. ".exe", ".exe")
+        end
+      end,
+    }):mount()
+  end
+
+  -- npm install <pkg> or run a script parsed from package.json (via vim readfile).
+  local function run_npm()
+    local has_package_json = vim.fn.filereadable("package.json") == 1
+    Menu({
+      position = "50%",
+      size = { width = 40, height = 3 },
+      border = { style = "rounded", text = { top = " NPM Options ", top_align = "center" } },
+      win_options = border_opts,
+    }, {
+      lines = { Menu.item("Install Package"), Menu.item("Run Script") },
+      on_submit = function(item)
+        if item.text == "Install Package" then
+          Input({
+            position = "50%",
+            size = { width = 40 },
+            border = { style = "rounded", text = { top = " Package Name (empty = npm install) ", top_align = "center" } },
+            win_options = border_opts,
+          }, {
+            prompt = "> ",
+            default_value = "",
+            on_submit = function(value)
+              run_command(value == "" and "npm install" or ("npm install " .. value))
+            end,
+          }):mount()
+        elseif item.text == "Run Script" and has_package_json then
+          local ok, pkg = pcall(vim.fn.json_decode, table.concat(vim.fn.readfile("package.json"), "\n"))
+          if not ok or not pkg.scripts or vim.tbl_isempty(pkg.scripts) then
+            print("No scripts found in package.json or unable to parse it.")
+            return
+          end
+          local items = {}
+          for name, _ in pairs(pkg.scripts) do
+            table.insert(items, Menu.item(name))
+          end
+          table.sort(items, function(a, b)
+            return a.text < b.text
+          end)
+          Menu({
+            position = "50%",
+            size = { width = 40, height = math.min(#items + 2, 10) },
+            border = { style = "rounded", text = { top = " Select NPM Script ", top_align = "center" } },
+            win_options = border_opts,
+          }, {
+            lines = items,
+            on_submit = function(script_item)
+              run_command("npm run " .. script_item.text)
+            end,
+          }):mount()
+        elseif item.text == "Run Script" then
+          print("No package.json found in the current directory.")
+        end
+      end,
+    }):mount()
+  end
+
+  Menu({
     position = "50%",
-    size = {
-      width = 30,
-      height = 5,
-    },
-    border = {
-      style = "rounded",
-      text = { top = " Run Configuration ", top_align = "center" },
-    },
-    win_options = {
-      winblend = 10,
-      winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-    },
+    size = { width = 30, height = 5 },
+    border = { style = "rounded", text = { top = " Run Configuration ", top_align = "center" } },
+    win_options = border_opts,
   }, {
     lines = {
       Menu.item("Make"),
-      Menu.item("GCC Compile"),
-      Menu.item("Wingcc Compile"),
-      Menu.item("Run Node Server"),
+      Menu.item("C Compilation"),
+      Menu.item("Run Node Script"),
       Menu.item("Run Python Script"),
+      Menu.item("NPM Options"),
     },
     on_submit = function(item)
-      local exe_name = vim.fn.expand("%:r");
       if item.text == "Make" then
         run_command("make")
-      elseif item.text == "GCC Compile" then
-        run_command("gcc % -o " .. exe_name .. ".out && echo '' && ./" .. exe_name .. ".out")
-      elseif item.text == "Wingcc Compile" then
-        run_command("wingcc % -o " .. exe_name .. ".exe && echo '' && ./" .. exe_name .. ".exe")
-      elseif item.text == "Run Node Server" then
-        run_command("node server.js")
+      elseif item.text == "C Compilation" then
+        run_c_compilation()
+      elseif item.text == "Run Node Script" then
+        run_node_script()
       elseif item.text == "Run Python Script" then
-        run_command("python3 %")
+        run_command(python .. " %")
+      elseif item.text == "NPM Options" then
+        run_npm()
       end
     end,
-  })
-
-  menu:mount()
+  }):mount()
 end
 
 vim.api.nvim_set_keymap("n", "<leader>m", ":lua open_menu()<CR>", { noremap = true, silent = true })
 
+-- Use treemux (a tmux popup file tree) when tmux is available on unix;
+-- otherwise fall back to the real nvim-tree (e.g. on Windows).
+local has_tmux = (vim.fn.executable("tmux") == 1) and not is_win
+
 function _G.open_treemux()
-  vim.fn.system("tmux display-popup -E 'treemux'")
+  if has_tmux then
+    vim.fn.system("tmux display-popup -E 'treemux'")
+  else
+    require("nvim-tree.api").tree.toggle()
+  end
 end
 
--- Add commands for tree operations that redirect to treemux
-vim.api.nvim_create_user_command("NvimTreeToggle", function()
-  _G.open_treemux()
-end, {})
+-- Only redirect the NvimTree commands to treemux when tmux is present;
+-- on Windows the native nvim-tree commands are left intact.
+if has_tmux then
+  for _, name in ipairs({ "NvimTreeToggle", "NvimTreeOpen", "NvimTreeFocus", "TreemuxToggle" }) do
+    vim.api.nvim_create_user_command(name, function()
+      _G.open_treemux()
+    end, {})
+  end
+end
 
-vim.api.nvim_create_user_command("NvimTreeOpen", function()
-  _G.open_treemux()
-end, {})
-
-vim.api.nvim_create_user_command("NvimTreeFocus", function()
-  _G.open_treemux()
-end, {})
-
-vim.api.nvim_create_user_command("TreemuxToggle", function()
-  _G.open_treemux()
-end, {})
-
--- Handle directory opening
+-- Handle directory opening: cd into it, drop the dir buffer, open the tree.
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     local args = vim.fn.argv()
-    -- Check if the argument is a directory
     if #args > 0 and vim.fn.isdirectory(args[1]) == 1 then
-      -- Change to the directory
       vim.cmd("cd " .. vim.fn.fnameescape(args[1]))
-      -- Close any initial buffer
       vim.cmd("bd")
-      -- Open treemux in a popup
       _G.open_treemux()
     end
   end,
 })
-vim.g.python3_host_prog = '/Users/seymour-butts/.pyenv/shims/python3'
+-- Python provider: pyenv on macOS, project venv on Linux, PATH lookup on Windows.
+if is_mac then
+  vim.g.python3_host_prog = vim.fn.expand("~/.pyenv/shims/python3")
+elseif is_linux then
+  vim.g.python3_host_prog = vim.fn.expand("~/.config/nvim/venv/bin/python3")
+end
 vim.keymap.set("n", "<leader>y", 'ggVG"+y')
 vim.keymap.set("n", "<leader>a", "ggVG", { noremap = true, desc = "Select entire file" })
