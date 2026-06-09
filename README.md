@@ -1,79 +1,62 @@
-Here's a cleaned-up version of your README with clearer structure, removed inline install instructions, and a streamlined workflow using your provided scripts:
+# 🛠️ Dotfiles
 
----
+A single cross-platform dotfiles repo for **macOS**, **Linux/Kali**, and **Windows**.
+Configs live in [GNU Stow](https://www.gnu.org/software/stow/) packages; OS-specific
+behavior is handled inside the configs (`case "$OSTYPE"` in zsh, `vim.fn.has(...)`
+guards in Neovim) so the same files work everywhere.
 
-# 🛠️ Dotfiles Setup
+## Layout
 
-A personal, highly customized setup for terminal tools, Neovim, Zsh, Tmux, Ghostty, and hacking utilities.
+```
+nvim/.config/nvim/      Neovim (init.lua, lazy-lock.json, templates/)
+zsh/.zshrc              Zsh — shared core + per-OS PATH/alias arms
+zsh/.p10k.zsh           Powerlevel10k theme
+tmux/.tmux.conf         tmux + catppuccin + treemux
+ssh/.ssh/config         SSH client config
+keyb/.config/keyb/      keyb cheatsheet
+i3/.config/i3/config    i3 window manager      (Linux only)
+bin/.local/bin/         helper scripts         (Linux/Kali: ghostty, hacktools, run-commands)
+install.sh              mac/Linux deploy (stow)
+install.ps1             Windows deploy (symlink)
+```
 
-## ⚡ Installation Workflow
-
-Clone this repository:
+## Install
 
 ```bash
-git clone https://github.com/your-username/dotfiles.git ~/dotfiles
+git clone <repo-url> ~/dotfiles
 cd ~/dotfiles
 ```
 
-Then follow these steps to initialize everything:
-
----
-
-### 🧰 1. System & Tool Initialization
-
-Run:
+**macOS / Linux** — symlinks the right packages for the detected OS:
 
 ```bash
-./run-command.sh
+./install.sh
 ```
 
-This script installs system dependencies (like Python, Node, LuaRocks), sets up Neovim and Oh-My-Zsh, and prepares your development environment.
+**Windows** (PowerShell, with Developer Mode or an elevated shell so symlinks work):
 
----
-
-### 👻 2. Install Ghostty (Terminal Emulator)
-
-Run:
-
-```bash
-./ghostty.sh
+```powershell
+./install.ps1
 ```
 
-This script downloads and builds [Ghostty](https://ghostty.org) from source using Zig, ensuring you get the latest version.
+On Windows only the Neovim config is linked (zsh/tmux/i3 aren't used there).
 
----
+## Per-machine prerequisites
 
-### 🕵️ 3. Hack Tools Setup
+Neovim uses the **`main` branch** of nvim-treesitter, which compiles parsers with the
+`tree-sitter` CLI + a C compiler. Linters `pylint`/`yamllint` are managed via `uv`, and
+`luacheck` via a standalone binary (kept out of Mason — see `ignore_install` in `init.lua`).
 
-Run:
+| Tool | macOS | Linux/Kali | Windows |
+|------|-------|-----------|---------|
+| tree-sitter CLI + compiler | `brew install tree-sitter` | `cargo install tree-sitter-cli` (+ build-essential) | `scoop install tree-sitter` |
+| luacheck | `brew install luacheck` | `apt install lua-check` or luarocks | `scoop install luacheck` |
+| pylint, yamllint | `uv tool install pylint yamllint` | `uv tool install pylint yamllint` | `uv tool install pylint yamllint` |
+| stow (deploy) | `brew install stow` | `sudo apt install stow` | n/a (uses `install.ps1`) |
 
-```bash
-./hacktools.sh
-```
+## Notes
 
-This installs custom web API testing tools, reverse engineering utilities, and other offensive security essentials.
-
----
-
-## 💡 Extras
-
-- All configurations are managed via `stow`. After setup, simply run:
-
-  ```bash
-  stow .
-  ```
-
-- Fonts (like NerdFonts) and plugins for `tmux`, `zsh`, and `nvim` are handled automatically.
-- Customize further inside the `~/dotfiles` directory.
-
----
-
-## 🔗 References
-
-- [Neovim Install Guide](https://github.com/neovim/neovim/blob/master/INSTALL.md)
-- [Ghostty Build Docs](https://ghostty.org/docs/install/build)
-- [Oh-My-Zsh](https://ohmyz.sh/)
-
----
-
-Let me know if you want this turned into a `README.md` file directly or need any of the scripts tweaked to auto-detect things like OS/package manager.
+- Secrets go in `~/.secrets` (git-ignored), sourced automatically by `.zshrc`.
+- The Linux helper scripts (`bin/.local/bin/{ghostty,hacktools,run-commands}.sh`) install
+  Ghostty, offensive-security tooling, and system deps respectively.
+- Branches `mac-dfile` and `windows-dfile` are retained as pre-unification backups.
