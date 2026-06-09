@@ -405,37 +405,42 @@ local plugins = {
     end,
   },
 
-{
-  "nvim-treesitter/nvim-treesitter",
-  branch = "main", -- new rewrite; the old `nvim-treesitter.configs` API no longer exists
-  lazy = false,
-  build = ":TSUpdate",
-  config = function()
-    -- Parsers to keep installed (downloads async in the background).
-    require("nvim-treesitter").install({
-      "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
-      "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
-      "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
-    })
-
-    -- Enable tree-sitter highlighting + indentation per buffer when a parser
-    -- is available (replaces the old highlight/indent = { enable = true } opts).
-    vim.api.nvim_create_autocmd("FileType", {
-      callback = function(ev)
-        if pcall(vim.treesitter.start, ev.buf) then
-          vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-        end
-      end,
-    })
-  end,
-},
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = {
+          "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
+          "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
+          "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        },
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
+    end,
+  },
 
 }
 -- Plugin configuration
 require("lazy").setup(plugins, opts)
 require("catppuccin").setup()
 -- Additions setups
-vim.cmd("set relativenumber")
+vim.opt.number = true
+vim.opt.relativenumber = true
+local function ToggleNumber()
+  if vim.wo.relativenumber then
+    vim.wo.relativenumber = false
+  else
+    vim.wo.relativenumber = true
+  end
+
+  vim.wo.number = true
+end
+
+vim.keymap.set("n", "<leader>n", ToggleNumber, {
+  desc = "Toggle relative line numbers",
+})
 vim.cmd("set autoindent")
 -- Enable folding by default
 vim.opt.foldenable = false
