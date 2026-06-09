@@ -428,6 +428,7 @@ local plugins = {
     })
   end,
 },
+
 }
 -- Plugin configuration
 require("lazy").setup(plugins, opts)
@@ -635,5 +636,6 @@ if is_mac then
 elseif is_linux then
   vim.g.python3_host_prog = vim.fn.expand("~/.config/nvim/venv/bin/python3")
 end
+
 vim.keymap.set("n", "<leader>y", 'ggVG"+y')
 vim.keymap.set("n", "<leader>a", "ggVG", { noremap = true, desc = "Select entire file" })
