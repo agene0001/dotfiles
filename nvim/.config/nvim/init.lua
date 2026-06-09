@@ -62,7 +62,6 @@ local plugins = {
   },
 
   {
-
     "hrsh7th/nvim-cmp",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
@@ -95,31 +94,6 @@ local plugins = {
           { name = "path" },
         }),
       })
-      -- LSP capabilities for nvim-cmp
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local lspconfig = require("lspconfig")
-      local servers = {
-        "lua_ls",
-        "pyright",
-        "ts_ls",
-        "gopls",
-        "clangd",
-        "marksman",
-        "rust_analyzer",
-        "omnisharp",
-        "bashls",
-        "cmake",
-        "dartls",
-        "dockerls",
-        "html",
-        "jdtls",
-        "efm", -- corrected server names
-      }
-      for _, lsp in ipairs(servers) do
-        lspconfig[lsp].setup({
-          capabilities = capabilities,
-        })
-      end
     end,
   },
   { "github/copilot.vim" },
@@ -184,7 +158,7 @@ local plugins = {
 
   {
     "williamboman/mason-lspconfig.nvim",
-    after = "mason.nvim", -- Ensure mason.nvim loads first
+    after = "mason.nvim",
     config = function()
       require("mason-lspconfig").setup({
         ensure_installed = {
@@ -208,6 +182,25 @@ local plugins = {
           "gradle_ls",
           "tailwindcss",
         },
+        handlers = {
+          -- default handler for all servers
+          function(server_name)
+            require("lspconfig")[server_name].setup({
+              capabilities = require("cmp_nvim_lsp").default_capabilities(),
+            })
+          end,
+          -- gradle_ls needs initializationOptions
+          ["gradle_ls"] = function()
+            require("lspconfig").gradle_ls.setup({
+              capabilities = require("cmp_nvim_lsp").default_capabilities(),
+              init_options = {
+                settings = {
+                  gradleWrapperEnabled = true,
+                },
+              },
+            })
+          end,
+        },
       })
     end,
   },
@@ -215,17 +208,29 @@ local plugins = {
   {
     "rshkarin/mason-nvim-lint",
     after = "mason.nvim",
+    event = "VeryLazy",
     config = function()
       require("mason-nvim-lint").setup({
+        -- ensure_installed already covers every linter, so turn off the
+        -- automatic (on-FileType) installer to avoid the install race that
+        -- throws "Package is already installing".
+        automatic_installation = false,
+        quiet_mode = true,
+        -- Only the linters Mason can actually build on this machine.
         ensure_installed = {
           "eslint_d",
-          "pylint",
-          "luacheck",
           "shellcheck",
           "jsonlint",
-          "yamllint",
           "markdownlint",
           "stylelint",
+          "htmlhint",
+        },
+        -- Managed outside Mason (uv tools + luarocks), found on PATH by
+        -- nvim-lint; tell Mason not to try installing them.
+        ignore_install = {
+          "pylint",   -- uv tool install pylint
+          "yamllint", -- uv tool install yamllint
+          "luacheck", -- luarocks install luacheck
         },
       })
     end,
@@ -264,7 +269,7 @@ local plugins = {
       -- Keymap to trigger linting manually
       vim.keymap.set("n", "<leader>ll", function()
         lint.try_lint()
-        vim.lsp.buf.format() -- Replace 'formatting_sync' with 'format'
+        vim.lsp.buf.format()
       end, { desc = "Trigger linting for current file" })
     end,
   },
@@ -282,15 +287,10 @@ local plugins = {
           typescriptreact = { format },
           svelte = { format },
           css = { format },
-
           html = { format },
-
           json = { format },
-
           yaml = { format },
-
           markdown = { format },
-
           lua = { "stylua" },
           python = { "isort", "black" },
         },
@@ -306,7 +306,7 @@ local plugins = {
     dependencies = {
       "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
-      "nvim-neotest/nvim-nio", -- Add this line
+      "nvim-neotest/nvim-nio",
       "mfussenegger/nvim-dap-python",
       "julianolf/nvim-dap-lldb",
     },
@@ -334,51 +334,37 @@ local plugins = {
   },
   {
     "neovim/nvim-lspconfig",
-
-    after = "mason-lspconfig.nvim", -- Ensure mason-lspconfig loads first
+    after = "mason-lspconfig.nvim",
     config = function()
-      -- You can set up LSP servers here
-      local lspconfig = require("lspconfig")
-
-      -- Set up common on_attach function
       local on_attach = function(client, bufnr)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
-
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
       end
 
-      lspconfig.clangd.setup({
+      local servers = {
+        "clangd", "pyright", "ts_ls", "gopls", "lua_ls",
+        "dockerls", "html", "marksman", "jdtls", "bashls",
+      }
+
+      for _, server in ipairs(servers) do
+        vim.lsp.config[server] = {
+          on_attach = on_attach,
+          capabilities = require("cmp_nvim_lsp").default_capabilities(),
+        }
+        vim.lsp.enable(server)
+      end
+
+      -- gradle_ls needs special init_options
+      vim.lsp.config["gradle_ls"] = {
         on_attach = on_attach,
-      })
-      -- pyright for Python
-      lspconfig.pyright.setup({
-        on_attach = on_attach,
-      })
-
-      -- tsserver for TypeScript/JavaScript
-      lspconfig.ts_ls.setup({
-        on_attach = on_attach,
-      })
-
-      -- gopls for Go
-      lspconfig.gopls.setup({
-        on_attach = on_attach,
-      })
-
-      -- lua_ls for Lua
-      lspconfig.lua_ls.setup({
-        on_attach = on_attach,
-      })
-
-      -- Setup other servers
-      lspconfig.dockerls.setup({ on_attach = on_attach })
-      lspconfig.html.setup({ on_attach = on_attach })
-
-      lspconfig.marksman.setup({ on_attach = on_attach })
-
-      lspconfig.jdtls.setup({ on_attach = on_attach })
-
-      lspconfig.bashls.setup({ on_attach = on_attach })
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+        init_options = {
+          settings = {
+            gradleWrapperEnabled = true,
+          },
+        },
+      }
+      vim.lsp.enable("gradle_ls")
     end,
   },
 
@@ -392,54 +378,31 @@ local plugins = {
       vim.cmd.colorscheme("catppuccin-mocha")
     end,
   },
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate", -- this updates parsers
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          "lua",
-          "python",
-          "javascript",
-          "c",
-          "markdown",
-          "markdown_inline",
-          "rust",
-          "c_sharp",
-          "bash",
-          "cmake",
-          "cpp",
-          "dart",
-          "dockerfile",
-          "go",
-          "gitignore",
-          "html",
-          "java",
-          "http",
-          "make",
-          "typescript",
-        }, -- specify languages
-        highlight = { enable = true },
-        indent = { enable = true },
-        fold = { enable = false }, -- Make sure folding is enabled
-      })
-      vim.opt.foldmethod = "expr"
-      vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-    end,
-  },
-  {
-    "nvim-treesitter/nvim-treesitter-refactor",
-    after = "nvim-treesitter", -- This ensures it's loaded after nvim-treesitter
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        refactor = {
-          highlight_definitions = { enable = true },
-          highlight_current_scope = { enable = true },
-          -- Other refactor settings can go here
-        },
-      })
-    end,
-  },
+{
+  "nvim-treesitter/nvim-treesitter",
+  branch = "main", -- new rewrite; the old `nvim-treesitter.configs` API no longer exists
+  lazy = false,
+  build = ":TSUpdate",
+  config = function()
+    -- Parsers to keep installed (downloads async in the background).
+    require("nvim-treesitter").install({
+      "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
+      "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
+      "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+    })
+
+    -- Enable tree-sitter highlighting + indentation per buffer when a parser
+    -- is available (replaces the old highlight/indent = { enable = true } opts).
+    vim.api.nvim_create_autocmd("FileType", {
+      callback = function(ev)
+        if pcall(vim.treesitter.start, ev.buf) then
+          vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end,
+    })
+  end,
+},
+  { "nvim-treesitter/nvim-treesitter-locals" },
 }
 -- Plugin configuration
 require("lazy").setup(plugins, opts)
@@ -452,7 +415,6 @@ vim.opt.foldenable = false
 vim.opt.tabstop = 2      -- Use 2 spaces for a tab character
 vim.opt.shiftwidth = 2   -- Indentation level of 2 spaces
 vim.opt.expandtab = true -- Convert tabs to spaces
--- Additional setup for other plugins can go here
 -- Override nvim-tree with treemux for directory openings
 -- Create global functions to handle tree operations via treemux
 _G.open_menu = function()
@@ -565,3 +527,5 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 vim.g.python3_host_prog = '/Users/seymour-butts/.pyenv/shims/python3'
+vim.keymap.set("n", "<leader>y", 'ggVG"+y')
+vim.keymap.set("n", "<leader>a", "ggVG", { noremap = true, desc = "Select entire file" })
