@@ -4,3 +4,9 @@
 .secrets
 # Stray file from an old accidental redirect
 nvim/.config/nvim/]
+
+# Never commit SSH private key material (public .pub keys are allowed)
+ssh/.ssh/id_*
+!ssh/.ssh/id_*.pub
+ssh/.ssh/*.pem
+ssh/.ssh/*.key
