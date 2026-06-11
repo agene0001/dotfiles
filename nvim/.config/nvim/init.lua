@@ -5,7 +5,7 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
-
+vim.treesitter.language.register('json', 'jsonl')
 -- OS detection helpers (used for path/command/tmux guards throughout)
 local is_mac = vim.fn.has("mac") == 1
 local is_win = vim.fn.has("win32") == 1
@@ -412,21 +412,23 @@ local plugins = {
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter").setup({
+        -- Omit parsers Neovim 0.12.1 already bundles (c, lua, markdown,
+        -- markdown_inline, query, vim, vimdoc) — nvim-treesitter's pinned
+        -- versions of those override the bundled ones and break query compat.
         ensure_installed = {
-          "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
-          "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
-          "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+          "bash", "cpp", "css", "go", "html", "javascript", "json",
+          "luadoc", "python",
+          "rust", "toml", "tsx", "typescript", "yaml",
         },
       })
 
       -- The main branch no longer auto-enables features; do it per buffer.
       vim.api.nvim_create_autocmd("FileType", {
         callback = function(args)
-          local ft = vim.bo[args.buf].filetype
-          local lang = vim.treesitter.language.get_lang(ft)
-          -- Only start if a parser for this filetype is actually installed.
-          if lang and pcall(vim.treesitter.language.add, lang) then
-            vim.treesitter.start(args.buf)
+          -- pcall the call that actually asserts (start), so a missing
+          -- parser (e.g. plugin UI buffers like mason_backdrop) is skipped
+          -- cleanly instead of throwing.
+          if pcall(vim.treesitter.start, args.buf) then
             -- Treesitter-based indentation (experimental upstream).
             vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
           end
