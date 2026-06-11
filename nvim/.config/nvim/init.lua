@@ -407,16 +407,28 @@ local plugins = {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false, -- main branch does not support lazy-loading
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
-          "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
-          "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
-        },
-        highlight = { enable = true },
-        indent = { enable = true },
+      require("nvim-treesitter").install({
+        "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
+        "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
+        "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+      })
+
+      -- The main branch no longer auto-enables features; do it per buffer.
+      vim.api.nvim_create_autocmd("FileType", {
+        callback = function(args)
+          local ft = vim.bo[args.buf].filetype
+          local lang = vim.treesitter.language.get_lang(ft)
+          -- Only start if a parser for this filetype is actually installed.
+          if lang and pcall(vim.treesitter.language.add, lang) then
+            vim.treesitter.start(args.buf)
+            -- Treesitter-based indentation (experimental upstream).
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
       })
     end,
   },
