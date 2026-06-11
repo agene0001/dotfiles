@@ -411,10 +411,12 @@ local plugins = {
     lazy = false, -- main branch does not support lazy-loading
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter").install({
-        "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
-        "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
-        "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+      require("nvim-treesitter").setup({
+        ensure_installed = {
+          "bash", "c", "cpp", "css", "go", "html", "javascript", "json",
+          "lua", "luadoc", "markdown", "markdown_inline", "python", "query",
+          "rust", "toml", "tsx", "typescript", "vim", "vimdoc", "yaml",
+        },
       })
 
       -- The main branch no longer auto-enables features; do it per buffer.
